@@ -25,7 +25,6 @@ class InputImage(Input):
         
 class FirstExecutorInputs(Inputs):
     inputImage: InputImage
-    
 
     
 
@@ -33,7 +32,7 @@ class FirstExecutorInputs(Inputs):
 
 #  Option 1   
 
-class SimpleText(Configs):
+class SimpleText(Config):
     name: Literal["Text"]= "Text"
     value:str
     type: Literal["string"] = "string"
@@ -42,7 +41,7 @@ class SimpleText(Configs):
     class Config:
         title = "Text"
 
-class SimpleNumber(Configs):
+class SimpleNumber(Config):
     name: Literal["Number"]= "Number"
     value: int
     type: Literal["number"] = "number"
@@ -50,20 +49,11 @@ class SimpleNumber(Configs):
     
     class Config:
         title = "Number"
-    
-class SimpleOptions(Configs):
-    name: Literal["Options"]= "Options"
-    value: Union[SimpleNumber, SimpleText]
-    type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
-    
-    class Config:
-        title = "Options"
-        
+
         
 # Option 2
 
-class EnableFlag(Configs):
+class EnableFlag(Config):
     name: Literal["Enable"] = "Enable"
     value: Literal[True] = True
     type: Literal["bool"] = "bool"
@@ -72,32 +62,45 @@ class EnableFlag(Configs):
     class Config:
         title = "Enable"
         
-class ModeSelect(Configs):
+class ModeSelect(Config):
     name: Literal["Mode"] = "Mode"
     value: Literal["Mode1", "Mode2", "Mode3"] = "Mode1"
     type: Literal["string"] = "string"
     field: Literal["selectBox"] = "selectBox"
     
-class AdvancedOptions(Configs):
-    name: Literal["Advanced"]= "Advanced"
+
+# Dependent dropdown
+
+class Grayscale(Config):
+    name: Literal["Grayscale"] = "Grayscale"
+    value: Union[SimpleText, SimpleNumber]
+    type: Literal["object"] = "object"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Convert to Grayscale"
+
+
+class FlipHorizontal(Config):
+    name: Literal["Flip Horizontal"] = "Flip Horizontal"
     value: Union[EnableFlag, ModeSelect]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Mode Select"
+        title = "Flip Horizontally"
 
-    
-# Dependent dropdown
 
-class DependentOptionA(Configs):
-    name: Literal["OptionA"] = "OptionA"
-    value: Union[SimpleOptions, AdvancedOptions]
+
+class Operation(Config):
+    name: Literal["Mode"] = "Mode"
+    value: Union[Grayscale, FlipHorizontal]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+
     
 class FirstExecutorConfigs(Configs):
-    dependentOptionA: DependentOptionA
+    operation: Operation
 
 # Outputs
 class OutputImage(Output):
@@ -121,88 +124,26 @@ class FirstExecutorOutputs(Outputs):
 
 
 
-#  *************************************************
-class KeepSideFalse(Config):
-    name: Literal["False"] = "False"
-    value: Literal[False] = False
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Disable"
-
-
-class KeepSideTrue(Config):
-    name: Literal["True"] = "True"
-    value: Literal[True] = True
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Enable"
-
-
-class KeepSideBBox(Config):
-    """
-        Rotate image without catting off sides.
-    """
-    name: Literal["KeepSide"] = "KeepSide"
-    value: Union[KeepSideTrue, KeepSideFalse]
-    type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
-
-    class Config:
-        title = "Keep Sides"
-
-
-class Degree(Config):
-    """
-        Positive angles specify counterclockwise rotation while negative angles indicate clockwise rotation.
-    """
-    name: Literal["Degree"] = "Degree"
-    value: int = Field(ge=-359.0, le=359.0,default=0)
-    type: Literal["number"] = "number"
-    field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["[-359, 359]"] = "[-359, 359]"
-
-    class Config:
-        title = "Angle"
-
-
-class PackageInputs(Inputs):
-    inputImage: InputImage
-
-
-class PackageConfigs(Configs):
-    degree: Degree
-    drawBBox: KeepSideBBox
-
-
-
-
-
-class PackageRequest(Request):
-    inputs: Optional[PackageInputs]
-    configs: PackageConfigs
+class FirstExecutorRequest(Request):
+    inputs: Optional[FirstExecutorInputs]
+    configs: FirstExecutorConfigs
 
     class Config:
         json_schema_extra = {
             "target": "configs"
         }
+        
+class FirstExecutorResponse(Response):
+    outputs: FirstExecutorOutputs
 
-
-class PackageResponse(Response):
-    outputs: PackageOutputs
-
-
-class PackageExecutor(Config):
-    name: Literal["Package"] = "Package"
-    value: Union[PackageRequest, PackageResponse]
+class FirstExecutor(Config):
+    name: Literal["FirstExecutor"] = "FirstExecutor"
+    value: Union[FirstExecutorRequest, FirstExecutorResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
-
+    
     class Config:
-        title = "Package"
+        title = "FirstExecutor"
         json_schema_extra = {
             "target": {
                 "value": 0
@@ -210,15 +151,16 @@ class PackageExecutor(Config):
         }
 
 
+
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[PackageExecutor]
+    value: Union[FirstExecutor]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
     class Config:
         title = "Task"
-        json_schema_extra = {
+        json_schema_extra = {   
             "target": "value"
         }
 
