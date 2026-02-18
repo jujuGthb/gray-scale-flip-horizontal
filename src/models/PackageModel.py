@@ -4,6 +4,9 @@ from typing import List, Optional, Union, Literal
 from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
 
 
+# Inputs of the first executor
+
+
 class InputImage(Input):
     name: Literal["inputImage"] = "inputImage"
     value: Union[List[Image], Image]
@@ -19,6 +22,51 @@ class InputImage(Input):
 
     class Config:
         title = "Image"
+        
+class FirstExecutorInputs(Inputs):
+    inputImage: InputImage
+    
+
+    
+
+# ---------- configs---------------
+
+#  Option 1
+
+class SimpleText(Configs):
+    name: Literal["Text"]= "Text"
+    value:str
+    type: Literal["string"] = "string"
+    field: Literal["textInput"] = "textInput"
+    
+    class Config:
+        title = "Text"
+
+class SimpleNumber(Configs):
+    name: Literal["Number"]= "Number"
+    value: int
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+    
+    class Config:
+        title = "Number"
+    
+class SimpleOptions(Configs):
+    name: Literal["Options"]= "Options"
+    value: Union[SimpleNumber, SimpleText]
+    type: Literal["object"] = "object"
+    field: Literal["dropdownlist"] = "dropdownlist"
+    
+    class Config:
+        title = "Options"
+        
+        
+# Option 2
+
+
+class FirstExecutorConfigs(Inputs):
+    text: SimpleText
+    number: SimpleNumber
 
 
 class OutputImage(Output):
@@ -38,6 +86,11 @@ class OutputImage(Output):
         title = "Image"
 
 
+class PackageOutputs(Outputs):
+    outputImage: OutputImage
+
+
+#  *************************************************
 class KeepSideFalse(Config):
     name: Literal["False"] = "False"
     value: Literal[False] = False
@@ -94,8 +147,7 @@ class PackageConfigs(Configs):
     drawBBox: KeepSideBBox
 
 
-class PackageOutputs(Outputs):
-    outputImage: OutputImage
+
 
 
 class PackageRequest(Request):
