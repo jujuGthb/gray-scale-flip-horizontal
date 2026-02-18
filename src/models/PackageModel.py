@@ -31,7 +31,7 @@ class FirstExecutorInputs(Inputs):
 
 # ---------- configs---------------
 
-#  Option 1
+#  Option 1   
 
 class SimpleText(Configs):
     name: Literal["Text"]= "Text"
@@ -63,12 +63,43 @@ class SimpleOptions(Configs):
         
 # Option 2
 
+class EnableFlag(Configs):
+    name: Literal["Enable"] = "Enable"
+    value: Literal[True] = True
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
 
-class FirstExecutorConfigs(Inputs):
-    text: SimpleText
-    number: SimpleNumber
+    class Config:
+        title = "Enable"
+        
+class ModeSelect(Configs):
+    name: Literal["Mode"] = "Mode"
+    value: Literal["Mode1", "Mode2", "Mode3"] = "Mode1"
+    type: Literal["string"] = "string"
+    field: Literal["selectBox"] = "selectBox"
+    
+class AdvancedOptions(Configs):
+    name: Literal["Advanced"]= "Advanced"
+    value: Union[EnableFlag, ModeSelect]
+    type: Literal["object"] = "object"
+    field: Literal["option"] = "option"
 
+    class Config:
+        title = "Mode Select"
 
+    
+# Dependent dropdown
+
+class DependentOptionA(Configs):
+    name: Literal["OptionA"] = "OptionA"
+    value: Union[SimpleOptions, AdvancedOptions]
+    type: Literal["object"] = "object"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    
+class FirstExecutorConfigs(Configs):
+    dependentOptionA: DependentOptionA
+
+# Outputs
 class OutputImage(Output):
     name: Literal["outputImage"] = "outputImage"
     value: Union[List[Image],Image]
@@ -84,10 +115,10 @@ class OutputImage(Output):
 
     class Config:
         title = "Image"
-
-
-class PackageOutputs(Outputs):
+        
+class FirstExecutorOutputs(Outputs):
     outputImage: OutputImage
+
 
 
 #  *************************************************
