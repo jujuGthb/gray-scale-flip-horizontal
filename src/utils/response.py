@@ -18,9 +18,7 @@ def build_response(context):
     executor = ConfigExecutor(value=firstExecutor)
     packageConfigs = PackageConfigs(executor=executor)
 
-    package = PackageHelper(
-        packageModel=PackageModel,
-        packageConfigs=packageConfigs
-    )
+    package = PackageHelper(packageModel=PackageModel, packageConfigs=packageConfigs)
+    packageModel = package.build_model(context)
 
-    return package.build_model(context)
+    return packageModel

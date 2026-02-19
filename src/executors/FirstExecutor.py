@@ -20,26 +20,25 @@ class FirstExecutor(Component):
     def __init__(self, request, bootstrap):
         super().__init__(request, bootstrap)
         self.request.model = PackageModel(**(self.request.data))
-        
+
         self.mode = self.request.get_param("Operation")
-        self.inputImage = self.request.get_param("inputImage")
+        self.image = self.request.get_param("inputImage")
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
         return {}
 
 
-    def gray(self, image):
-        return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    def gray(self, img):
+        return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
-    def flip(self, image):
-        return cv2.flip(image, 1)
+    def flip(self, img):
+        return cv2.flip(img, 1)
 
 
     def run(self):
-        img=Image.get_frame(img=self.inputImage, redis_db=self.redis_db)
-        
+        img=Image.get_frame(img=self.image, redis_db=self.redis_db)
 
         
         if self.mode:
@@ -51,10 +50,11 @@ class FirstExecutor(Component):
                 img.value = self.flip(img.value)
                 
         
-        img = Image.set_frame(img=img, package_uID=self.uID, redis_db=self.redis_db)
-        self.image=img
-                
-        return build_response(context=self)
+        self.image = Image.set_frame(img=img, package_uID=self.uID, redis_db=self.redis_db)
+       
+        
+        packageModel = build_response(context=self)    
+        return packageModel
             
 
 
