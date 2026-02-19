@@ -29,13 +29,11 @@ class SecondExecutor(Component):
         return {}
 
     def resize_image(self, img, scale):
-        """Simple resize logic."""
         width = int(img.shape[1] * scale)
         height = int(img.shape[0] * scale)
         return cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
 
     def rotate_image(self, img, angle):
-        """Simple rotate logic."""
         (h, w) = img.shape[:2]
         center = (w / 2, h / 2)
         M = cv2.getRotationMatrix2D(center, angle, 1.0)
@@ -49,7 +47,6 @@ class SecondExecutor(Component):
         if self.image2:
             img2 = Image.get_frame(img=self.image2, redis_db=self.redis_db)
         else:
-            # If no second image, duplicate the first one 
             img2 = img1 
 
        
