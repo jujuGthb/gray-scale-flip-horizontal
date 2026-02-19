@@ -1,9 +1,12 @@
+
 from pydantic import Field, validator
 from typing import List, Optional, Union, Literal
 from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
 
 
-# ==================== INPUTS ====================
+# Inputs of the first executor
+
+
 class InputImage(Input):
     name: Literal["inputImage"] = "inputImage"
     value: Union[List[Image], Image]
@@ -15,91 +18,83 @@ class InputImage(Input):
         if isinstance(actual_value, Image):
             return "object"
         elif isinstance(actual_value, list):
-            return "list"
-        return type_value
+            return type_value
 
     class Config:
         title = "Image"
+        
 
 
-class FirstExecutorInputs(Inputs):
-    inputImage: InputImage
+    
 
+# ---------- configs---------------
 
-# ==================== CONFIG FIELDS (Leaf Nodes) ====================
-# These are now DIRECT attributes of Grayscale/FlipHorizontal
+#  Option 1   
 
-# Option 1 - Grayscale params (2 different field types: string + number)
-class GrayscaleText(Config):
-    name: Literal["GrayscaleText"] = "GrayscaleText"
-    value: str = "default_text"
+class SimpleText(Config):
+    name: Literal["Text"]= "Text"
+    value:str
     type: Literal["string"] = "string"
     field: Literal["textInput"] = "textInput"
     
     class Config:
-        title = "Text Parameter"
+        title = "Text"
 
-class GrayscaleNumber(Config):
-    name: Literal["GrayscaleNumber"] = "GrayscaleNumber"
-    value: int = 50
+class SimpleNumber(Config):
+    name: Literal["Number"]= "Number"
+    value: int
     type: Literal["number"] = "number"
-    field: Literal["slider"] = "slider"
+    field: Literal["textInput"] = "textInput"
     
     class Config:
-        title = "Number Parameter"
+        title = "Number"
 
+        
+# Option 2
 
-# Option 2 - Flip params (2 different field types: bool + string)
-class FlipEnable(Config):
-    name: Literal["FlipEnable"] = "FlipEnable"
-    value: bool = True
+class EnableFlag(Config):
+    name: Literal["Enable"] = "Enable"
+    value: Literal[True] = True
     type: Literal["bool"] = "bool"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Enable Flip"
+        title = "Enable"
         
-class FlipMode(Config):
-    name: Literal["FlipMode"] = "FlipMode"
+class ModeSelect(Config):
+    name: Literal["Mode"] = "Mode"
     value: Literal["Mode1", "Mode2", "Mode3"] = "Mode1"
     type: Literal["string"] = "string"
     field: Literal["selectBox"] = "selectBox"
     
-    class Config:
-        title = "Flip Mode"
 
-
-# ==================== DEPENDENT DROPDOWN OPTIONS ====================
-# Each option contains its fields as DIRECT attributes (not wrapped in Union)
+# Dependent dropdown
 
 class Grayscale(Config):
     name: Literal["Grayscale"] = "Grayscale"
-    grayscaleText: GrayscaleText  # ✅ Direct attribute (field type 1: string)
-    grayscaleNumber: GrayscaleNumber  # ✅ Direct attribute (field type 2: number)
+    value: Union[SimpleText, SimpleNumber]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
         title = "Convert to Grayscale"
         json_schema_extra = {
-            "fields": ["GrayscaleText", "GrayscaleNumber"]  # ✅ Tell UI which fields to show
+            "target": "value"
         }
-
 class FlipHorizontal(Config):
     name: Literal["Flip Horizontal"] = "Flip Horizontal"
-    flipEnable: FlipEnable  # ✅ Direct attribute (field type 1: bool)
-    flipMode: FlipMode  # ✅ Direct attribute (field type 2: string)
+    value: Union[EnableFlag, ModeSelect]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
         title = "Flip Horizontally"
         json_schema_extra = {
-            "fields": ["FlipEnable", "FlipMode"]  # ✅ Tell UI which fields to show
+            "target": "value"
         }
 
 
-# ==================== MAIN DEPENDENT DROPDOWN ====================
+
 class Operation(Config):
     name: Literal["Operation"] = "Operation"
     value: Union[Grayscale, FlipHorizontal]
@@ -109,18 +104,19 @@ class Operation(Config):
     class Config:
         title = "Operation"
         json_schema_extra = {
-            "target": "value"  # ✅ Navigate to Grayscale or FlipHorizontal
+            "target": "value"
         }
 
-
+    
+class FirstExecutorInputs(Inputs):
+    inputImage: InputImage
 class FirstExecutorConfigs(Configs):
     operation: Operation
 
-
-# ==================== OUTPUTS ====================
+# Outputs
 class OutputImage(Output):
     name: Literal["outputImage"] = "outputImage"
-    value: Union[List[Image], Image]
+    value: Union[List[Image],Image]
     type: str = "object"
 
     @validator("type", pre=True, always=True)
@@ -129,17 +125,14 @@ class OutputImage(Output):
         if isinstance(actual_value, Image):
             return "object"
         elif isinstance(actual_value, list):
-            return "list"
-        return type_value
+            return type_value
 
     class Config:
         title = "Image"
-
-class FirstExecutorOutputs(Outputs):
-    outputImage: OutputImage
+        
 
 
-# ==================== REQUEST/RESPONSE ====================
+
 class FirstExecutorRequest(Request):
     inputs: Optional[FirstExecutorInputs]
     configs: FirstExecutorConfigs
@@ -149,27 +142,31 @@ class FirstExecutorRequest(Request):
             "target": "configs"
         }
         
+class FirstExecutorOutputs(Outputs):
+    outputImage: OutputImage
+    
 class FirstExecutorResponse(Response):
     outputs: FirstExecutorOutputs
 
-
-# ==================== EXECUTOR WRAPPER ====================
 class FirstExecutor(Config):
     name: Literal["FirstExecutor"] = "FirstExecutor"
-    value: FirstExecutorRequest
+    value: Union[FirstExecutorRequest, FirstExecutorResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
     
     class Config:
         title = "FirstExecutor"
         json_schema_extra = {
-            "target": "value"
+            "target": {
+                "value": 0
+            }
         }
+
 
 
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: FirstExecutor
+    value: Union[FirstExecutor]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
