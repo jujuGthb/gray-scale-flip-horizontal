@@ -13,12 +13,12 @@ class InputImage(Input):
     type: str = "object"
 
     @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
+    def set_type_based_on_value(cls, type_value, values):
+        actual_value = values.get('value')
+        if isinstance(actual_value, Image):
             return "object"
-        elif isinstance(value, list):
-            return "list"
+        elif isinstance(actual_value, list):
+            return type_value
 
     class Config:
         title = "Image"
@@ -109,12 +109,12 @@ class OutputImage(Output):
     type: str = "object"
 
     @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
+    def set_type_based_on_value(cls, type_value, values):
+        actual_value = values.get('value')
+        if isinstance(actual_value, Image):
             return "object"
-        elif isinstance(value, list):
-            return "list"
+        elif isinstance(actual_value, list):
+            return type_value
 
     class Config:
         title = "Image"
