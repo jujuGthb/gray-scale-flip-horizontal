@@ -1,6 +1,7 @@
 """
-    It is one of the preprocessing components in which the image is rotated.
+First Executor: image preprocessing (Grayscale or Horizontal Flip).
 """
+
 
 import os
 import cv2
@@ -15,7 +16,7 @@ from components.Package.src.utils.response import build_response
 from components.Package.src.models.PackageModel import PackageModel
 
 
-class executor(Component):
+class FirstExecutor(Component):
     def __init__(self, request, bootstrap):
         super().__init__(request, bootstrap)
         self.request.model = PackageModel(**(self.request.data))
@@ -49,8 +50,10 @@ class executor(Component):
             elif option_name == "Flip Horizontal":
                 img.value = self.flip(img.value)
                 
-        self.inputImage = Image.set_frame(img=img, package_uID=self.uID, redis_db=self.redis_db)
         
+        img = Image.set_frame(img=img, package_uID=self.uID, redis_db=self.redis_db)
+        self.image=img
+                
         return build_response(context=self)
             
 

@@ -93,7 +93,7 @@ class FlipHorizontal(Config):
 
 
 class Operation(Config):
-    name: Literal["Mode"] = "Mode"
+    name: Literal["Operation"] = "Operation"
     value: Union[Grayscale, FlipHorizontal]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
