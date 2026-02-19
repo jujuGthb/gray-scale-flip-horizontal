@@ -23,8 +23,7 @@ class InputImage(Input):
     class Config:
         title = "Image"
         
-class FirstExecutorInputs(Inputs):
-    inputImage: InputImage
+
 
     
 
@@ -79,8 +78,9 @@ class Grayscale(Config):
 
     class Config:
         title = "Convert to Grayscale"
-
-
+        json_schema_extra = {
+            "target": "value"
+        }
 class FlipHorizontal(Config):
     name: Literal["Flip Horizontal"] = "Flip Horizontal"
     value: Union[EnableFlag, ModeSelect]
@@ -89,6 +89,9 @@ class FlipHorizontal(Config):
 
     class Config:
         title = "Flip Horizontally"
+        json_schema_extra = {
+            "target": "value"
+        }
 
 
 
@@ -97,8 +100,16 @@ class Operation(Config):
     value: Union[Grayscale, FlipHorizontal]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    
+    class Config:
+        title = "Operation"
+        json_schema_extra = {
+            "target": "value"
+        }
 
     
+class FirstExecutorInputs(Inputs):
+    inputImage: InputImage
 class FirstExecutorConfigs(Configs):
     operation: Operation
 
@@ -119,8 +130,6 @@ class OutputImage(Output):
     class Config:
         title = "Image"
         
-class FirstExecutorOutputs(Outputs):
-    outputImage: OutputImage
 
 
 
@@ -133,6 +142,9 @@ class FirstExecutorRequest(Request):
             "target": "configs"
         }
         
+class FirstExecutorOutputs(Outputs):
+    outputImage: OutputImage
+    
 class FirstExecutorResponse(Response):
     outputs: FirstExecutorOutputs
 
