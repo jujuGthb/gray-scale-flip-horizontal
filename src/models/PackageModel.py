@@ -260,11 +260,7 @@ class FirstExecutor(Config):
     
     class Config:
         title = "FirstExecutor"
-        json_schema_extra = {
-            "target": {
-                "value": 0
-            }
-        }
+       
 
 
 class SecondExecutor(Config):
@@ -274,11 +270,7 @@ class SecondExecutor(Config):
     field: Literal["option"] = "option"
     class Config:
         title = "SecondExecutor"
-        json_schema_extra = {
-            "target": {
-                "value": 1
-                }
-            }
+        
 
 
 class ConfigExecutor(Config):
