@@ -290,7 +290,7 @@ class ConfigExecutor(Config):
     class Config:
         title = "Task"
         json_schema_extra = {   
-            "target": "value"
+             "shortDescription": "gray scale flip horizontal"
         }
         
         
